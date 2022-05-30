@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+      - "4571:4571"
+      - "7777:${PORT_WEB_UI-8080}"
+    restart: always
+    environment:
+      - LAMBDA_DOCKER_NETWORK=localstacknetwork1
+      - TEST_AWS_ACCOUNT_ID=000000000000
+      - SERVICES=${SERVICES- }
+      - DEBUG=${DEBUG- }
+      - DATA_DIR=${DATA_DIR- }
+      - PORT_WEB_UI=${PORT_WEB_UI- }
+      - LAMBDA_EXECUTOR=docker-reuse
+      - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    networks:
+      - localstacknetwork1
+    volumes:
+      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
+      - ./localstack_bootstrap:/docker-entrypoint-initaws.d/
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "../../:/tmp/axiom"
+    privileged: true
+
+networks:
+  localstacknetwork1:
+    external: true
+    name: localstacknetwork1
